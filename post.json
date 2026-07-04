@@ -1,0 +1,7 @@
+{
+  "repo": "https://github.com/ryanda9910/erdlens",
+  "card": "https://raw.githubusercontent.com/ryanda9910/erdlens/main/assets/social-card.png",
+  "alt": "erdlens terminal showcase: a SQL schema turned into a Mermaid ER diagram, a workflow spec turned into a flowchart, and a drift check catching a stale diagram after a migration.",
+  "threads": "Minta Claude Code dokumentasiin database. Dia tulis doc-nya, kamu bikin ER diagram di tool lain, copy-paste balik. Kerja dua kali. Dan begitu ada migration, diagram di doc jadi salah tanpa ketahuan.\n\nerdlens nutup loop itu. MCP server: Claude baca skema kamu (SQL/Prisma/Drizzle/TypeORM/SQLAlchemy) → ER diagram Mermaid → tulis langsung ke dokumen. Plus workflow → flowchart, dan drift-check yang nangkep diagram basi.\n\nZero-dep, MIT: https://github.com/ryanda9910/erdlens",
+  "bluesky": "Ask Claude Code to document your DB: it writes the doc, you draw the ER diagram elsewhere, copy-paste it back. Double work. And after a migration the diagram is quietly wrong.\n\nerdlens closes that loop. An MCP server: Claude reads your schema (SQL/Prisma/Drizzle/TypeORM/SQLAlchemy) and writes the ER diagram straight into the doc. Plus workflow to flowchart, plus drift-check.\n\nMIT, zero-dep."
+}
