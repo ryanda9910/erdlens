@@ -15,7 +15,7 @@ CREATE TABLE users (id INTEGER PRIMARY KEY, email TEXT UNIQUE);
 CREATE TABLE posts (id INTEGER PRIMARY KEY, author_id INTEGER REFERENCES users(id));
 `);
 
-const srv = spawn(process.execPath, ["bin/erdlens.js", "mcp"], { stdio: ["pipe", "pipe", "inherit"] });
+const srv = spawn(process.execPath, ["dist/index.js", "mcp"], { stdio: ["pipe", "pipe", "inherit"] });
 let outBuf = "";
 const pending = new Map();
 srv.stdout.on("data", (c) => {
@@ -38,10 +38,12 @@ check("initialize returns serverInfo", init.result?.serverInfo?.name === "erdlen
 
 const list = await rpc(2, "tools/list", {});
 const toolNames = (list.result?.tools || []).map((t) => t.name);
-check("tools/list has 3 tools", toolNames.length === 3);
+check("tools/list has 5 tools", toolNames.length === 5);
 check("exposes schema_to_erd", toolNames.includes("schema_to_erd"));
 check("exposes render_erd", toolNames.includes("render_erd"));
 check("exposes drift_check", toolNames.includes("drift_check"));
+check("exposes workflow_to_diagram", toolNames.includes("workflow_to_diagram"));
+check("exposes render_workflow", toolNames.includes("render_workflow"));
 
 const s2e = await rpc(3, "tools/call", { name: "schema_to_erd", arguments: { source_path: schemaPath } });
 const s2eText = s2e.result?.content?.[0]?.text || "";
@@ -64,6 +66,18 @@ writeFileSync(schemaPath, readFileSync(schemaPath, "utf8") + "\nCREATE TABLE tag
 const drifted = await rpc(6, "tools/call", { name: "drift_check", arguments: { doc_path: outMmd, schema_path: schemaPath } });
 const dText = drifted.result?.content?.[0]?.text || "";
 check("drift_check flags stale after new table", /stale/i.test(dText) && /tags/.test(dText));
+
+// workflow_to_diagram
+const wf = await rpc(7, "tools/call", { name: "workflow_to_diagram", arguments: { source_text: "start -> validate\nvalidate -> charge : ok\nvalidate -> reject : fail\ncharge -> done" } });
+const wfText = wf.result?.content?.[0]?.text || "";
+check("workflow_to_diagram returns flowchart", /```mermaid/.test(wfText) && /flowchart TD/.test(wfText));
+check("workflow_to_diagram keeps branch label", /validate -->\|ok\| charge/.test(wfText));
+
+// render_workflow writes files
+const wfOut = join(dir, "wf.mmd");
+await rpc(8, "tools/call", { name: "render_workflow", arguments: { source_text: "a -> b -> c", out_path: wfOut } });
+check("render_workflow wrote .mmd", existsSync(wfOut) && /flowchart/.test(readFileSync(wfOut, "utf8")));
+check("render_workflow wrote .html", existsSync(join(dir, "wf.html")));
 
 srv.stdin.end();
 srv.kill();

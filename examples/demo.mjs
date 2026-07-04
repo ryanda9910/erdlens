@@ -3,10 +3,8 @@
  * key-free. Runs the REAL erdlens engine: schema -> ERD, then a migration ->
  * drift. Run: node examples/demo.mjs
  */
-import { createRequire } from "node:module";
-const require = createRequire(import.meta.url);
-const erd = require("../src/erd.cjs");
-const drift = require("../src/drift.cjs");
+import * as erd from "../dist/model/erd.js";
+import * as drift from "../dist/model/drift.js";
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const C = {

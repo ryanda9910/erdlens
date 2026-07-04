@@ -12,9 +12,14 @@
 
 <p align="center">
   <img alt="license" src="https://img.shields.io/badge/license-MIT-6C8EEF" />
-  <img alt="deps" src="https://img.shields.io/badge/dependencies-0-6C8EEF" />
-  <img alt="tests" src="https://img.shields.io/badge/tests-37%20passing-6C8EEF" />
+  <img alt="runtime deps" src="https://img.shields.io/badge/runtime%20deps-0-6C8EEF" />
+  <img alt="tests" src="https://img.shields.io/badge/tests-57%20passing-6C8EEF" />
   <img alt="mcp" src="https://img.shields.io/badge/MCP-server-6C8EEF" />
+  <img alt="typescript" src="https://img.shields.io/badge/TypeScript-MVVM-6C8EEF" />
+</p>
+
+<p align="center">
+  <img src="assets/showcase.gif" alt="erdlens turning a schema into an ER diagram, a workflow into a flowchart, and catching drift after a migration" width="720" />
 </p>
 
 ---
@@ -61,8 +66,10 @@ Then just ask Claude Code: *"document the database and put an ER diagram in docs
 | tool | what it does |
 |--|--|
 | `schema_to_erd` | schema (path or text) → Mermaid `erDiagram` + a ```mermaid fenced block to paste anywhere |
-| `render_erd` | writes the diagram to disk: `.mmd` source, an embeddable `.md`, and a self-contained `.html` preview — so it goes straight into a doc, no copy-paste |
+| `render_erd` | writes the ERD to disk: `.mmd` source, an embeddable `.md`, and a self-contained `.html` preview — so it goes straight into a doc, no copy-paste |
 | `drift_check` | compares an ERD already in a `.mmd`/`.md` against the current schema, and reports every table, column, and relation added or removed since. Run it in CI so a stale diagram fails the build |
+| `workflow_to_diagram` | a workflow spec (a tiny text DSL or JSON steps) → Mermaid `flowchart` + fenced block. Document a process, pipeline, or state machine next to the ERD |
+| `render_workflow` | same as `render_erd`, for workflows — writes the flowchart to disk, embeddable |
 
 ## The drift check
 
@@ -79,6 +86,32 @@ Regenerate with render_erd to fix.
 
 Exit code is non-zero when stale, so it drops into a CI step or a pre-commit hook.
 
+## Workflows too
+
+Not just data. Give it a workflow and it draws the flowchart — same "into your docs" path.
+
+```
+# publish.flow
+start -> draft
+draft -> review
+review -> publish : approved
+review -> draft : changes
+publish -> done
+```
+
+```bash
+erdlens flow publish.flow
+```
+```
+flowchart TD
+  start(["start"])
+  ...
+  review -->|approved| publish
+  review -->|changes| draft
+```
+
+Ask Claude Code *"put the publish workflow in docs/flow.md"* and it calls `render_workflow`.
+
 ## Also a CLI
 
 Without an MCP client:
@@ -86,17 +119,37 @@ Without an MCP client:
 ```bash
 erdlens erd db/schema.sql            # print the Mermaid ERD
 erdlens erd prisma/schema.prisma     # auto-detects Prisma
+erdlens flow pipeline.flow           # print a Mermaid flowchart
 erdlens drift docs/erd.mmd db/schema.sql   # exit 1 if drifted
+erdlens tune                         # run the self-check loop (below)
 ```
+
+## Self-improving loop
+
+`erdlens tune` is a maker → checker → reflect loop: it runs every parser on a fixture plus a drift
+scenario (maker), an independent grader flags anything that passed before and fails now (checker),
+and it persists per-source pass state to `~/.erdlens/memory.json` (reflect). It's how the parsers stay
+honest as new schema dialects get added — a regression surfaces instead of slipping through.
 
 ## Tests
 
 ```bash
-npm test    # 24 engine assertions + 13 MCP stdio assertions
+npm test    # builds, then 57 assertions: 24 schema engine + 14 workflow + 19 MCP stdio
 ```
 
-Zero dependencies. The MCP server is a from-scratch JSON-RPC stdio implementation; the HTML preview
-loads Mermaid from a CDN only when you open it in a browser.
+There's also an end-to-end script that drives the whole thing through a real Claude Code run
+(`bash test/e2e.sh`, needs the `claude` CLI logged in).
+
+## How it's built
+
+TypeScript, laid out MVVM:
+
+- **Model** (`src/model/`) — pure logic: schema parsers, workflow parser, drift diff, types.
+- **ViewModel** (`src/viewmodel/`) — orchestration: the tool operations and the self-improving loop.
+- **View** (`src/view/`) — surfaces: the JSON-RPC MCP server, the CLI, and Mermaid/HTML rendering.
+
+Zero **runtime** dependencies. The MCP server is a from-scratch JSON-RPC stdio implementation; the HTML
+preview loads Mermaid from a CDN only when you open it in a browser.
 
 ## License
 

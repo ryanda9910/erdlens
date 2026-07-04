@@ -40,6 +40,13 @@ claude mcp add erdlens -- npx -y github:ryanda9910/erdlens
 - `render_erd` —— 写入磁盘：`.mmd` + 可嵌入的 `.md` + 自包含的 `.html` 预览。
 - `drift_check` —— 对比文档里的 ERD 与当前 schema，报告新增/删除的表、列、关系。放进 CI，过时的图会
   让构建失败。
+- `workflow_to_diagram` / `render_workflow` —— 工作流规格（文本 DSL 或 JSON）→ Mermaid `flowchart`，
+  在 ERD 旁边记录流程 / 管线 / 状态机。
+
+## 自我改进循环
+
+`erdlens tune` = maker → checker → reflect 循环：对每个解析器跑一遍 fixture 加漂移场景，独立评分器
+标记"之前通过、现在失败"的回归，并把状态持久化到 `~/.erdlens/memory.json`。
 
 ## 漂移检查
 

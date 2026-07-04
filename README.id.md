@@ -42,6 +42,13 @@ Dia panggil `render_erd`, diagram-nya masuk ke file.
 - `render_erd` — tulis ke disk: `.mmd` + `.md` embeddable + preview `.html`. Langsung masuk doc.
 - `drift_check` — bandingkan ERD di dokumen vs skema sekarang, laporkan tabel/kolom/relasi yang
   ditambah/dihapus. Jalankan di CI biar diagram basi bikin build gagal.
+- `workflow_to_diagram` / `render_workflow` — spec workflow (DSL teks atau JSON) → Mermaid `flowchart`,
+  buat dokumentasi proses/pipeline/state machine di samping ERD.
+
+## Loop mandiri
+
+`erdlens tune` = loop maker → checker → reflect: jalankan tiap parser pada fixture + skenario drift,
+grader independen tandai yang dulu lulus kini gagal (regresi), simpan status ke `~/.erdlens/memory.json`.
 
 ## Drift check
 

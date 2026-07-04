@@ -1,33 +1,39 @@
 # Contributing
 
-erdlens is an MCP server (`src/server.js`) over a zero-dependency schema engine (`src/erd.cjs`) and a
-drift checker (`src/drift.cjs`). Contributions that parse more schemas correctly, or make drift sharper,
-are welcome.
+erdlens is TypeScript, laid out MVVM and compiled to `dist/`:
+
+- **Model** (`src/model/`) — pure logic + types: `erd.ts` (schema → ER model), `flow.ts` (workflow →
+  graph), `drift.ts` (diff two schemas), `types.ts`.
+- **ViewModel** (`src/viewmodel/`) — orchestration: `diagram.ts` (tool operations = model + file I/O),
+  `tune.ts` (the self-improving loop).
+- **View** (`src/view/`) — surfaces: `mcpServer.ts` (JSON-RPC stdio), `cli.ts`, `render.ts`
+  (Mermaid/HTML presentation). `src/index.ts` is the composition root.
+
+Contributions that parse more schemas correctly, or make drift sharper, are welcome.
 
 ## Good contributions
 
-- **A schema it parses wrong** — a SQL dialect, Prisma/Drizzle/TypeORM/SQLAlchemy construct that comes
-  out with the wrong table, column, PK/FK, or relation. Open an issue with the input, add a failing
-  assertion to `test/erd.test.mjs`, then the fix.
+- **A schema it parses wrong** — a SQL dialect or ORM construct that comes out with the wrong table,
+  column, PK/FK, or relation. Open an issue with the input, add a failing assertion to
+  `test/erd.test.mjs`, then the fix in `src/model/erd.ts`.
 - **A drift miss** — a schema change `drift_check` doesn't notice. Add a case to the drift tests.
-- **A new schema source** — another ORM or IDL. Add a `parseX` in `src/erd.cjs`, wire it into `detect`
-  and `parse`, and test it.
+- **A new schema source** — another ORM or IDL. Add a `parseX` in `src/model/erd.ts`, wire it into
+  `detect` and `parse`, and test it.
+- **A workflow feature** — a DSL/JSON construct in `src/model/flow.ts`.
 - **A translation** — add a `README.<lang>.md` and link it in the language row.
 
 ## Rules
 
-- Keep it zero-dependency. The MCP server, parsers, and drift check must not pull runtime deps.
-- Every change to a parser or to drift needs a test. Run `npm test` (37 assertions today).
+- Keep it zero **runtime** dependency. Model/ViewModel/View must not pull runtime deps (dev deps like
+  TypeScript are fine).
+- Respect the MVVM boundary: a View never imports a Model directly — it goes through a ViewModel.
+- Every change to a parser, drift, or flow needs a test. `npm test` builds and runs 57 assertions.
 
 ## Commits
 
-[Conventional Commits](https://www.conventionalcommits.org): `<type>(<scope>)?: <subject>` —
-`feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
-CI lints every PR. Enable the dep-free local hook once:
-
-```bash
-git config core.hooksPath .githooks
-```
+[Conventional Commits](https://www.conventionalcommits.org), enforced by commitlint via a husky
+`commit-msg` hook (installed automatically on `npm install`) and in CI. Types: `feat`, `fix`, `docs`,
+`style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
 
 ## License
 
