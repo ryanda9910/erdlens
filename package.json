@@ -18,7 +18,7 @@
     "build": "tsc",
     "test": "npm run build && node test/erd.test.mjs && node test/flow.test.mjs && node test/mcp.test.mjs",
     "tune": "npm run build && node dist/index.js tune",
-    "prepare": "husky && tsc"
+    "prepare": "husky || true; tsc"
   },
   "keywords": [
     "mcp",
