@@ -5,7 +5,7 @@ import * as vm from "../viewmodel/diagram.js";
 
 const PROTOCOL_VERSION = "2024-11-05";
 const NAME = "erdlens";
-const VERSION = "0.1.0";
+const VERSION = "0.2.0";
 
 interface Tool { name: string; description: string; inputSchema: unknown; }
 

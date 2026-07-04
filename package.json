@@ -1,6 +1,6 @@
 {
   "name": "erdlens",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server that turns your schema (SQL, Prisma, Drizzle, TypeORM, SQLAlchemy) into a Mermaid ERD, writes it straight into your docs, and flags when the diagram drifts from the schema. Zero dependencies.",
   "license": "MIT",
   "type": "module",
